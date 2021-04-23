@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/language_definitions.rxg -->
+
+<language_definitions>
+   <language processor="s1c88"
+            endian="little"
+            size="8"
+            variant="default"
+            version="1.0"
+            slafile="s1c88.sla"
+            processorspec="s1c88.pspec"
+            id=":LE:8:s1c88">
+    <description>Epson S1C88</description>
+    <compiler name="default" spec="s1c88.cspec" id="default"/>
+  </language>
+</language_definitions>
