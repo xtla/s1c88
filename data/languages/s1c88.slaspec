@@ -6,35 +6,55 @@
 define endian=little;
 define alignment=1;
 
-define space register  type=register_space  size=2  wordsize=1;
+define space register  type=register_space  size=1  wordsize=1;
 define space ram       type=ram_space       size=2  wordsize=1;
-define space rom       type=ram_space       size=2  wordsize=1  default;
+define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
 define register offset=0x00 size=1 [B A H L];
-# define register offset=0x00 size=2 [IX IY];
-# define register offset=0x00 size=2 [PC SP];
-# define register offset=0x00 size=1 [BR];
-# define register offset=0x00 size=1 [F];
+define register offset=0x04 size=2 [IX IY PC SP];
+define register offset=0x0c size=1 [BR];
+define register offset=0x0e size=1 [F];
 # leave out CC for now
 
-define token opcode8 (8)
-  op = (0, 7)
+define token instr8 (8)
+  op8_instr8 = (0, 7)
 ;
 
-define token imm (8)
-  imm8 = (0, 7)
+define token instr16 (16)
+  op8_instr16 = (0, 7)
+  imm8_instr16 = (8, 15)
+  op16_instr16 = (0, 15)
 ;
 
-:ADDAA is op=0x00 {}
-:ADDA imm8 is op=0x02 ; imm8 {}
+define token instr24 (24)
+  op8_instr24 = (0, 7)
+  imm16_instr24 = (8, 15)
+  # not implemented yet: case with 1 8-bit op8_instr8, 2 8-bit operands
+  # and case with 1 16-bit op8_instr8, 1 8-bit operand
+;
 
-:ORAY is op=0x2f {}
+:ADDA_A is op8_instr8=0x00 {}
+:ADDA_B is op8_instr8=0x01 {}
+:ADDA imm8_instr16 is op8_instr16=0x02 & imm8_instr16 {}
+:ADDA_HL is op8_instr8=0x03 {}
+:ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
 
-:DECX is op=0x9a {}
-:POPY is op=0xab {}
+:SBCA_B is op8_instr8=0x19 {}
 
-:NOP is op=0xff {}
+:ORAY is op8_instr8=0x2F {}
+
+:LDIX_A is op8_instr8=0x60 {}
+
+:XOR_A imm16_instr24 is op8_instr24=0x3D & imm16_instr24 {}
+
+:DECX is op8_instr8=0x9A {}
+
+:POPY is op8_instr8=0xAB {}
+
+:JRS imm8_instr16 is op8_instr16=0xF1 & imm8_instr16 {}
+
+:NOP is op8_instr8=0xFF {}
 
 # define endian=little;
 # define alignment=1;
