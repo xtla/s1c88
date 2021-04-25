@@ -19,9 +19,9 @@ define register offset=0x0e size=1 [F];
 
 define token instr8 (8)
   op8_instr8 = (0, 7)
-  op4_instr8 = (0, 3)
-  op4_5_instr8 = (4, 5)
-  reg6_7_instr8 = (6, 7)
+  op4_instr8 = (4, 7)
+  op4_5_instr8 = (2, 3)
+  reg6_7_instr8 = (0, 1)
 ;
 
 define token instr16 (16)
