@@ -38,7 +38,7 @@ define token instr24 (24)
   # and case with 1 16-bit op8_instr8, 1 8-bit operand
 ;
 
-attach variables [ reg6_7_instr8 ] [ B A H L ];
+attach variables [ reg6_7_instr8 ] [ A B L H ];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
