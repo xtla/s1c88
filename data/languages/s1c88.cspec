@@ -3,6 +3,7 @@
 <!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/compiler_spec.rxg -->
 
 <compiler_spec>
+  <stackpointer register="sp" space="ram"/>
   <default_proto>
     <prototype name="default" extrapop="unknown" stackshift="0">
       <input></input>
