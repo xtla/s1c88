@@ -19,6 +19,9 @@ define register offset=0x0e size=1 [F];
 
 define token instr8 (8)
   op8_instr8 = (0, 7)
+  op4_instr8 = (0, 3)
+  op4_5_instr8 = (4, 5)
+  reg6_7_instr8 = (6, 7)
 ;
 
 define token instr16 (16)
@@ -30,9 +33,12 @@ define token instr16 (16)
 define token instr24 (24)
   op8_instr24 = (0, 7)
   imm16_instr24 = (8, 15)
+  imm24_instr24 = (16, 23)
   # not implemented yet: case with 1 8-bit op8_instr8, 2 8-bit operands
   # and case with 1 16-bit op8_instr8, 1 8-bit operand
 ;
+
+attach variables [ reg6_7_instr8 ] [ B A H L ];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
@@ -40,17 +46,37 @@ define token instr24 (24)
 :ADDA_HL is op8_instr8=0x03 {}
 :ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
 
+:UNPACK is    op8_instr8=0xDF {}
+
 :SBCA_B is op8_instr8=0x19 {}
 
 :ORAY is op8_instr8=0x2F {}
 
-:LDIX_A is op8_instr8=0x60 {}
+# This MOV is totally broken somehow
+:MOV "[X]",reg6_7_instr8 is    op4_instr8=6 ; op4_5_instr8=0 ; reg6_7_instr8 {}
+:LDIX_B is op8_instr8=0x61 {}
+:LDIX_L is op8_instr8=0x62 {}
+:LDIX_H is op8_instr8=0x63 {}
+
+:LDIY_A is op8_instr8=0x70 {}
+:LDIY_B is op8_instr8=0x71 {}
+:LDIY_L is op8_instr8=0x72 {}
+:LDIY_H is op8_instr8=0x73 {}
+
+:LDIY imm24_instr24 imm16_instr24 is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
+
+
+# 1 0 0 0   0 0 x x
+:INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
+
+:TST_B imm8_instr16 is op8_instr16=0x97 & imm8_instr16 {}
 
 :XOR_A imm16_instr24 is op8_instr24=0x3D & imm16_instr24 {}
 
 :DECX is op8_instr8=0x9A {}
 
 :POPY is op8_instr8=0xAB {}
+:POPHL is op8_instr8=0xA9 {}
 
 :JRS imm8_instr16 is op8_instr16=0xF1 & imm8_instr16 {}
 
