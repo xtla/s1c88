@@ -52,11 +52,7 @@ attach variables [ reg6_7_instr8 ] [ A B L H ];
 
 :ORAY is op8_instr8=0x2F {}
 
-# This MOV is totally broken somehow
-:MOV "[X]",reg6_7_instr8 is    op4_instr8=6 ; op4_5_instr8=0 ; reg6_7_instr8 {}
-:LDIX_B is op8_instr8=0x61 {}
-:LDIX_L is op8_instr8=0x62 {}
-:LDIX_H is op8_instr8=0x63 {}
+:MOV "[X]",reg6_7_instr8 is op4_instr8=6 & op4_5_instr8=0 & reg6_7_instr8 {}
 
 :LDIY_A is op8_instr8=0x70 {}
 :LDIY_B is op8_instr8=0x71 {}
