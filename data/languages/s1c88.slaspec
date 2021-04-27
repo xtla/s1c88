@@ -6,6 +6,7 @@
 # NOTE: NOP desert @  0x721 - 0x20FE
 # debugger == documentation mistranslations addressed here
 # SC = F
+# NB = U
 
 define endian=little;
 define alignment=1;
@@ -16,7 +17,7 @@ define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
 define register offset=0x00 size=1 [ A B L H ];
-define register offset=0x04 size=2 [IX IY PC SP];
+define register offset=0x04 size=2 [HL IX IY PC SP];
 define register offset=0x0c size=1 [BR];
 define register offset=0x0e size=1 [F];
 # leave out CC for now
@@ -65,10 +66,17 @@ attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
 
 :MOV "[X]",reg0_1_instr8 is op4_instr8=0x06 & op2_3_instr8=0x00 & reg0_1_instr8 {}
 :MOV "[Y]",reg0_1_instr8 is op4_instr8=0x07 & op2_3_instr8=0x00 & reg0_1_instr8 {}
-
-# 0 1 0 r r 1 0 1
 :MOV reg3_4_instr8,"[HL]" is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x05 {}
 :MOV reg3_4_instr8,"[X]" is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x06 {}
+:MOV "U",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC4 & imm24_instr24 {}
+# mov L, r
+:MOV "L",reg0_1_instr8 is op4_instr8=5 & op2_3_instr8=0 & reg0_1_instr8 {}
+# mov B, r
+:MOV "B",reg0_1_instr8 is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
+# mov L, [BR:bb]
+:MOV "L,[BR:"imm8_instr16"]"    is op8_instr16=0x54 & imm8_instr16 {}
+# mov A, [BR:bb]
+:MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
 
 :SBCA_B is op8_instr8=0x19 {}
 :ORAY is op8_instr8=0x2F {}
