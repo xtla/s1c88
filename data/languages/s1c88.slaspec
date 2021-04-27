@@ -3,6 +3,10 @@
 # Other language modules (see Ghidra/Processors) may provide better examples
 # when creating a new language module.
 
+# NOTE: NOP desert @  0x721 - 0x20FE
+# debugger == documentation mistranslations addressed here
+# SC = F
+
 define endian=little;
 define alignment=1;
 
@@ -11,7 +15,7 @@ define space ram       type=ram_space       size=2  wordsize=1;
 define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
-define register offset=0x00 size=1 [B A H L];
+define register offset=0x00 size=1 [ A B L H BR HL IX IY];
 define register offset=0x04 size=2 [IX IY PC SP];
 define register offset=0x0c size=1 [BR];
 define register offset=0x0e size=1 [F];
@@ -38,12 +42,13 @@ define token instr24 (24)
   # and case with 1 16-bit op8_instr8, 1 8-bit operand
 ;
 
-attach variables [ reg6_7_instr8 ] [ A B L H ];
+attach variables [ reg6_7_instr8 ] [ A B L H BR HL IX IY];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
 :ADDA imm8_instr16 is op8_instr16=0x02 & imm8_instr16 {}
-:ADDA_HL is op8_instr8=0x03 {}
+:ADD "A","["imm24_instr24 imm16_instr24"]"    is op8_instr24 & imm16_instr24 & imm24_instr24 {}
+:ADD_A_HL is op8_instr8=0x03 {}
 :ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
 
 :UNPACK is    op8_instr8=0xDF {}
@@ -53,13 +58,11 @@ attach variables [ reg6_7_instr8 ] [ A B L H ];
 :ORAY is op8_instr8=0x2F {}
 
 :MOV "[X]",reg6_7_instr8 is op4_instr8=6 & op4_5_instr8=0 & reg6_7_instr8 {}
+:MOV "[Y]",reg6_7_instr8 is op4_instr8=7 & op4_5_instr8=0 & reg6_7_instr8 {}
 
-:LDIY_A is op8_instr8=0x70 {}
-:LDIY_B is op8_instr8=0x71 {}
-:LDIY_L is op8_instr8=0x72 {}
-:LDIY_H is op8_instr8=0x73 {}
+:MOV "[Y]","["imm24_instr24 imm16_instr24"]" is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
+:MOV "B","["imm24_instr24 imm16_instr24"]" is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
 
-:LDIY imm24_instr24 imm16_instr24 is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
 
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
 
@@ -68,9 +71,11 @@ attach variables [ reg6_7_instr8 ] [ A B L H ];
 :XOR "A","A"    is op8_instr8=0x38 {}
 :XOR "A","B"    is op8_instr8=0x39 {}
 :XOR "A",imm8_instr16    is op8_instr16=0x3A & imm8_instr16 {}
-:XOR "A",imm16_instr24 ,imm24_instr24   is op8_instr24=0x3D & imm24_instr24 & imm16_instr24 {}
+:XOR "A",imm16_instr24 imm24_instr24   is op8_instr24=0x3D & imm16_instr24 & imm24_instr24 {}
+:XOR "F",imm8_instr16    is op8_instr16=0x9E & imm8_instr16 {}
 
-:DECX is op8_instr8=0x9A {}
+:DEC_X is op8_instr8=0x9A {}
+:DEC_BA is op8_instr8=0x98 {}
 
 :POPY is op8_instr8=0xAB {}
 :POPHL is op8_instr8=0xA9 {}
