@@ -3,6 +3,7 @@
 # Other language modules (see Ghidra/Processors) may provide better examples
 # when creating a new language module.
 
+# comment syntax note: r=A B H L rr=BR HL IX IY
 # NOTE: NOP desert @  0x721 - 0x20FE
 # debugger == documentation mistranslations addressed here
 # SC = F
@@ -17,8 +18,17 @@ define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
 define register offset=0x00 size=1 [ A B L H ];
-define register offset=0x04 size=2 [HL IX IY PC SP];
-define register offset=0x0c size=1 [BR];
+define register offset=0x04 size=1 [BR HL IX IY];
+
+# FOR C PLS READ!!
+# Why I made the change on line 20 is to fit the pattern that many
+# instructions follow in which they will be like
+# mov[HL],[BR:ll] mov[HL],[HL] mov[HL][IX] mov[HL],[IY]
+# with each value of the instruction above being separated by 1 bit increments
+# ask me for more details if curious, otherwise nuke this comment after you see it! 
+#define register offset=0x04 size=2 [HL IX IY PC SP];
+#define register offset=0x0c size=1 [BR];
+
 define register offset=0x0e size=1 [F];
 # leave out CC for now
 
@@ -39,12 +49,14 @@ define token instr8 (8)
   op2_3_instr8 = (2, 3)
   reg3_4_instr8 = (3, 4)
   reg0_1_instr8 = (0, 1)
+  dreg0_1_instr8 = (0, 1)
 ;
 
 define token instr16 (16)
   op8_instr16 = (0, 7)
   imm8_instr16 = (8, 15)
   op16_instr16 = (0, 15)
+  reg8_instr16 = (8, 15)
 ;
 
 define token instr24 (24)
@@ -56,6 +68,7 @@ define token instr24 (24)
 ;
 
 attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
+attach variables [ dreg0_1_instr8 ] [BR HL IX IY];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
@@ -63,20 +76,33 @@ attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
 :ADD_A_HL is op8_instr8=0x03 {}
 :ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
 :ADD "A","["imm24_instr24 imm16_instr24"]" is op8_instr24=0x05 & imm16_instr24 & imm24_instr24 {}
+# add IY, #hhll
+:ADD "Y",imm24_instr24 imm16_instr24    is op8_instr24=0xC3 & imm16_instr24 & imm24_instr24 {}
 
-:MOV "[X]",reg0_1_instr8 is op4_instr8=0x06 & op2_3_instr8=0x00 & reg0_1_instr8 {}
-:MOV "[Y]",reg0_1_instr8 is op4_instr8=0x07 & op2_3_instr8=0x00 & reg0_1_instr8 {}
-:MOV reg3_4_instr8,"[HL]" is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x05 {}
-:MOV reg3_4_instr8,"[X]" is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x06 {}
+# cmp A,#nn
+:CMP "A",imm8_instr16   is op8_instr16=0x32 & imm8_instr16 {}
+
+:MOV "[X]",reg0_1_instr8    is op4_instr8=0x06 & op2_3_instr8=0x00 & reg0_1_instr8 {}
+# mov [X], [rr]
+:MOV "[X],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b01 & dreg0_1_instr8 {}
+:MOV "[Y]",reg0_1_instr8    is op4_instr8=0x07 & op2_3_instr8=0x00 & reg0_1_instr8 {}
+:MOV "[Y]","["imm24_instr24 imm16_instr24"]"    is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
+:MOV reg3_4_instr8,"[HL]"   is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x05 {}
+:MOV reg3_4_instr8,"[X]"    is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x06 {}
 :MOV "U",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC4 & imm24_instr24 {}
 # mov L, r
-:MOV "L",reg0_1_instr8 is op4_instr8=5 & op2_3_instr8=0 & reg0_1_instr8 {}
+:MOV "L",reg0_1_instr8    is op4_instr8=5 & op2_3_instr8=0 & reg0_1_instr8 {}
 # mov B, r
-:MOV "B",reg0_1_instr8 is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
+:MOV "B",reg0_1_instr8    is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
 # mov L, [BR:bb]
 :MOV "L,[BR:"imm8_instr16"]"    is op8_instr16=0x54 & imm8_instr16 {}
 # mov A, [BR:bb]
 :MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
+# mov [HL], [rr]
+:MOV "[HL],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b11 & dreg0_1_instr8 {}
+# mov [HL], r
+:MOV "[HL]",reg0_1_instr8    is op4_instr8=0b0110 & op2_3_instr8=0b10 & reg0_1_instr8 {}
+
 
 :SBCA_B is op8_instr8=0x19 {}
 :ORAY is op8_instr8=0x2F {}
@@ -98,8 +124,6 @@ attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
 :POPY is op8_instr8=0xAB {}
 :POPHL is op8_instr8=0xA9 {}
 
-:MOV "[Y]","["imm24_instr24 imm16_instr24"]" is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
-
 :UNPACK is op8_instr8=0xDF {}
 
 :JMP_JRS reloc is op8_instr16=0xF1 & imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFF;] {
@@ -108,6 +132,8 @@ attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
 }
 
 :JMP_JRL imm24_instr24 imm16_instr24    is op8_instr24=0xF3 & imm16_instr24 & imm24_instr24 {}
+
+
 
 :NOP is op8_instr8=0xFF {}
 
