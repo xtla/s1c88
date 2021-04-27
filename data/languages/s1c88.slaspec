@@ -15,7 +15,7 @@ define space ram       type=ram_space       size=2  wordsize=1;
 define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
-define register offset=0x00 size=1 [ A B L H BR HL IX IY];
+define register offset=0x00 size=1 [ A B L H ];
 define register offset=0x04 size=2 [IX IY PC SP];
 define register offset=0x0c size=1 [BR];
 define register offset=0x0e size=1 [F];
@@ -24,7 +24,10 @@ define register offset=0x0e size=1 [F];
 define token instr8 (8)
   op8_instr8 = (0, 7)
   op4_instr8 = (4, 7)
+  op5_instr8 = (5, 7)
+  op0_2_instr8 = (0,2)
   op4_5_instr8 = (2, 3)
+  reg3_4_instr8 = (3,4)
   reg6_7_instr8 = (0, 1)
 ;
 
@@ -42,12 +45,12 @@ define token instr24 (24)
   # and case with 1 16-bit op8_instr8, 1 8-bit operand
 ;
 
-attach variables [ reg6_7_instr8 ] [ A B L H BR HL IX IY];
+attach variables [ reg6_7_instr8 reg3_4_instr8 ] [ A B L H ];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
 :ADDA imm8_instr16 is op8_instr16=0x02 & imm8_instr16 {}
-:ADD "A","["imm24_instr24 imm16_instr24"]"    is op8_instr24 & imm16_instr24 & imm24_instr24 {}
+:ADD "A","["imm24_instr24 imm16_instr24"]"    is op8_instr24=0x05 & imm16_instr24 & imm24_instr24 {}
 :ADD_A_HL is op8_instr8=0x03 {}
 :ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
 
@@ -57,11 +60,13 @@ attach variables [ reg6_7_instr8 ] [ A B L H BR HL IX IY];
 
 :ORAY is op8_instr8=0x2F {}
 
+
 :MOV "[X]",reg6_7_instr8 is op4_instr8=6 & op4_5_instr8=0 & reg6_7_instr8 {}
 :MOV "[Y]",reg6_7_instr8 is op4_instr8=7 & op4_5_instr8=0 & reg6_7_instr8 {}
-
 :MOV "[Y]","["imm24_instr24 imm16_instr24"]" is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
-:MOV "B","["imm24_instr24 imm16_instr24"]" is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
+# 0 1 0 r r 1 0 1 
+:MOV reg3_4_instr8,"[HL]" is op5_instr8=2 & reg3_4_instr8 & op0_2_instr8=5 {}
+:MOV reg3_4_instr8,"[X]" is op5_instr8=2 & reg3_4_instr8 & op0_2_instr8=6 {}
 
 
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
@@ -84,6 +89,7 @@ attach variables [ reg6_7_instr8 ] [ A B L H BR HL IX IY];
   local reloc_:2 = inst_next + imm8_instr16; # Removed the -1 to fix problem w/ stopping decompilation
   goto [reloc_];
 }
+:JMP_JRL imm24_instr24 imm16_instr24    is op8_instr24=0xF3 & imm16_instr24 & imm24_instr24 {}
 
 
 :NOP is op8_instr8=0xFF {}
