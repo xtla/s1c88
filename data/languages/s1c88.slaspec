@@ -21,6 +21,15 @@ define register offset=0x0c size=1 [BR];
 define register offset=0x0e size=1 [F];
 # leave out CC for now
 
+@define Z_flag "F[0,1]" # Z: Zero
+@define C_flag "F[1,1]" # C: Carry
+@define O_flag "F[2,1]" # O: Overflow
+@define S_flag "F[3,1]" # S: Sign
+@define BCD_flag "F[4,1]" # BCD: Binary Coded Decimal Mode
+@define NIB_flag "F[5,1]" # NIB: Low-Mask Mode ("Nibble")
+@define ID_flag "F[6,1]" # ID: Interrupt Disable
+@define IB_flag "F[7,1]" # IB: Interrupt Branch
+
 define token instr8 (8)
   op8_instr8 = (0, 7)
   op4_instr8 = (4, 7)
