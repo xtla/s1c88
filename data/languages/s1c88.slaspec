@@ -70,16 +70,15 @@ attach variables [ reg6_7_instr8 ] [ A B L H ];
 :XOR "A","A"    is op8_instr8=0x38 {}
 :XOR "A","B"    is op8_instr8=0x39 {}
 :XOR "A",imm8_instr16    is op8_instr16=0x3A & imm8_instr16 {}
-# THIS LINE COMPILES BUT ISN'T RECOGNIZED :( should be seen on instrcution 0x2c
-:XOR "A",imm16_instr24,imm24_instr24    is op8_instr24=0x3D & imm16_instr24 & imm24_instr24 {}
+:XOR "A",imm16_instr24 ,imm24_instr24   is op8_instr24=0x3D & imm24_instr24 & imm16_instr24 {}
 
 :DECX is op8_instr8=0x9A {}
 
 :POPY is op8_instr8=0xAB {}
 :POPHL is op8_instr8=0xA9 {}
 
-:JMP_JRS reloc is op8_instr16=0xF1 & imm8_instr16 [reloc=inst_next + imm8_instr16 - 1;] {
-  local reloc_:2 = inst_next + imm8_instr16 - 1;
+:JMP_JRS reloc is op8_instr16=0xF1 & imm8_instr16 [reloc=inst_next;] {
+  local reloc_:2 = inst_next + imm8_instr16; # Removed the -1 to fix problem w/ stopping decompilation
   goto [reloc_];
 }
 
