@@ -126,8 +126,13 @@ attach variables [ dreg0_1_instr8 ] [BR HL IX IY];
 
 :UNPACK is op8_instr8=0xDF {}
 
-:JMP_JRS reloc is op8_instr16=0xF1 & imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFF;] {
-  local reloc_:2 = (inst_start + imm8_instr16 + 1) & 0xFF;
+:JMP_JRS reloc is op8_instr16=0xF1 & imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFFFF;] {
+  local reloc_:4 = (inst_start + imm8_instr16 + 1) & 0xFFFF;
+  goto [reloc_];
+}
+
+:JNZ_JRS reloc is op8_instr16=0xE7 & imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFFFF;] {
+  local reloc_:4 = (inst_start + imm8_instr16 + 1) & 0xFFFF;
   goto [reloc_];
 }
 
