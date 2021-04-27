@@ -5,9 +5,10 @@
 
 # comment syntax note: r=A B H L rr=BR HL IX IY
 # NOTE: NOP desert @  0x721 - 0x20FE
-# debugger == documentation mistranslations addressed here
+# S1C88 Manual Symbol = PokeMiniD Symbol
 # SC = F
 # NB = U
+# EP = I
 
 define endian=little;
 define alignment=1;
@@ -57,6 +58,7 @@ define token instr16 (16)
   imm8_instr16 = (8, 15)
   op16_instr16 = (0, 15)
   reg8_instr16 = (8, 15)
+  dreg14_15_instr16 = (14, 15)
 ;
 
 define token instr24 (24)
@@ -68,7 +70,7 @@ define token instr24 (24)
 ;
 
 attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
-attach variables [ dreg0_1_instr8 ] [BR HL IX IY];
+attach variables [ dreg0_1_instr8 dreg14_15_instr16 ] [BR HL IX IY];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
@@ -82,6 +84,9 @@ attach variables [ dreg0_1_instr8 ] [BR HL IX IY];
 # cmp A,#nn
 :CMP "A",imm8_instr16   is op8_instr16=0x32 & imm8_instr16 {}
 
+:DEC_X is op8_instr8=0x9A {}
+:DEC_BA is op8_instr8=0x98 {}
+
 :MOV "[X]",reg0_1_instr8    is op4_instr8=0x06 & op2_3_instr8=0x00 & reg0_1_instr8 {}
 # mov [X], [rr]
 :MOV "[X],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b01 & dreg0_1_instr8 {}
@@ -90,39 +95,72 @@ attach variables [ dreg0_1_instr8 ] [BR HL IX IY];
 :MOV reg3_4_instr8,"[HL]"   is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x05 {}
 :MOV reg3_4_instr8,"[X]"    is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x06 {}
 :MOV "U",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC4 & imm24_instr24 {}
-# mov L, r
+
+# mov L,r
 :MOV "L",reg0_1_instr8    is op4_instr8=5 & op2_3_instr8=0 & reg0_1_instr8 {}
-# mov B, r
-:MOV "B",reg0_1_instr8    is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
-# mov L, [BR:bb]
+# mov L,[BR:bb]
 :MOV "L,[BR:"imm8_instr16"]"    is op8_instr16=0x54 & imm8_instr16 {}
-# mov A, [BR:bb]
+
+# mov B,r
+:MOV "B",reg0_1_instr8    is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
+# mov B,#nn
+:MOV "B",imm8_instr16    is op8_instr16=0xB1 & imm8_instr16 {}
+
+
+# mov A,[BR:bb]
 :MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
+
 # mov [HL], [rr]
 :MOV "[HL],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b11 & dreg0_1_instr8 {}
 # mov [HL], r
 :MOV "[HL]",reg0_1_instr8    is op4_instr8=0b0110 & op2_3_instr8=0b10 & reg0_1_instr8 {}
+# mov HL, rr
+
+
+# mov BA,#mmnn
+:MOV "BA",imm24_instr24 imm16_instr24   is op8_instr24=0xC4 & imm16_instr24 & imm24_instr24 {}
+# NOTE: THERES AN ERROR ON THE WIKI PAGE!!
+# The instruction manual says CF,C5 is mov [HL], HL
+# but the wiki page says CF,C5 doesnt exist
+# and the wiki page has TWO entries for CE,C5 while the debugger shows the correct
+# CE,C5 as mov I, #pp
+:MOV "I",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC5 & imm24_instr24 {}
+# mov X,#nn
+:MOV "X",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC6 & imm24_instr24 {}
 
 
 :SBCA_B is op8_instr8=0x19 {}
+
 :ORAY is op8_instr8=0x2F {}
+:OR "F",imm8_instr16    is op8_instr16=0x9D & imm8_instr16 {}
 
 :XOR "A","A" is op8_instr8=0x38 {}
 :XOR "A","B" is op8_instr8=0x39 {}
 :XOR "A",imm8_instr16 is op8_instr16=0x3A & imm8_instr16 {}
 :XOR "A",imm16_instr24 imm24_instr24 is op8_instr24=0x3D & imm16_instr24 & imm24_instr24 {}
+:XOR "F",imm8_instr16 is op8_instr16=0x9E & imm8_instr16 {}
 
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
 
 :TST_B imm8_instr16 is op8_instr16=0x97 & imm8_instr16 {}
 
-:XOR "F",imm8_instr16 is op8_instr16=0x9E & imm8_instr16 {}
+:POP_Y is op8_instr8=0xAB {}
+:POP_HL is op8_instr8=0xA9 {}
 
-:DEC_X is op8_instr8=0x9A {}
-:DEC_BA is op8_instr8=0x98 {}
-
-:POPY is op8_instr8=0xAB {}
-:POPHL is op8_instr8=0xA9 {}
+:PUSH_IY    is op8_instr8=0xA3 {}
+:PUSH_IX    is op8_instr8=0xA2 {}
+:PUSH_ALL   is op8_instr16=0xCE & imm8_instr16=0xB8 {}
+:PUSH_B     is op8_instr16=0xCE & imm8_instr16=0xB1 {}
+:PUSH_BA    is op8_instr8=0xA0 {}
+:PUSH_IP    is op8_instr8=0xA6 {}
+:PUSH_ALE   is op8_instr16=0xCE & imm8_instr16=0xB9 {}
+:PUSH_L     is op8_instr16=0xCE & imm8_instr16=0xB2 {}
+:PUSH_HL    is op8_instr8=0xA1 {}
+:PUSH_A     is op8_instr16=0xCE & imm8_instr16=0xB0 {}
+:PUSH_BR    is op8_instr8=0xA4 {}
+:PUSH_H     is op8_instr16=0xCE & imm8_instr16=0xB3 {}
+:PUSH_F     is op8_instr8=0xA7 {}
+:PUSH_I     is op8_instr8=0xA5 {}
 
 :UNPACK is op8_instr8=0xDF {}
 
@@ -139,8 +177,9 @@ attach variables [ dreg0_1_instr8 ] [BR HL IX IY];
 :JMP_JRL imm24_instr24 imm16_instr24    is op8_instr24=0xF3 & imm16_instr24 & imm24_instr24 {}
 
 
-
 :NOP is op8_instr8=0xFF {}
+
+:RET is op8_instr8=0xF8 {}
 
 # define endian=little;
 # define alignment=1;
