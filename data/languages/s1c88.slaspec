@@ -26,9 +26,9 @@ define token instr8 (8)
   op4_instr8 = (4, 7)
   op5_instr8 = (5, 7)
   op0_2_instr8 = (0, 2)
-  op4_5_instr8 = (2, 3)
+  op2_3_instr8 = (2, 3)
   reg3_4_instr8 = (3, 4)
-  reg6_7_instr8 = (0, 1)
+  reg0_1_instr8 = (0, 1)
 ;
 
 define token instr16 (16)
@@ -45,7 +45,7 @@ define token instr24 (24)
   # and case with 1 16-bit op8_instr8, 1 8-bit operand
 ;
 
-attach variables [ reg6_7_instr8 reg3_4_instr8 ] [ A B L H ];
+attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
 
 :ADDA_A is op8_instr8=0x00 {}
 :ADDA_B is op8_instr8=0x01 {}
@@ -54,8 +54,8 @@ attach variables [ reg6_7_instr8 reg3_4_instr8 ] [ A B L H ];
 :ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
 :ADD "A","["imm24_instr24 imm16_instr24"]" is op8_instr24=0x05 & imm16_instr24 & imm24_instr24 {}
 
-:MOV "[X]",reg6_7_instr8 is op4_instr8=0x06 & op4_5_instr8=0x00 & reg6_7_instr8 {}
-:MOV "[Y]",reg6_7_instr8 is op4_instr8=0x07 & op4_5_instr8=0x00 & reg6_7_instr8 {}
+:MOV "[X]",reg0_1_instr8 is op4_instr8=0x06 & op2_3_instr8=0x00 & reg0_1_instr8 {}
+:MOV "[Y]",reg0_1_instr8 is op4_instr8=0x07 & op2_3_instr8=0x00 & reg0_1_instr8 {}
 
 # 0 1 0 r r 1 0 1
 :MOV reg3_4_instr8,"[HL]" is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x05 {}
