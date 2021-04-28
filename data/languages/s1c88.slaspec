@@ -21,12 +21,6 @@ define space rom       type=ram_space       size=3  wordsize=1  default;
 define register offset=0x00 size=1 [ A B L H ];
 define register offset=0x04 size=1 [BR HL IX IY];
 
-# FOR C PLS READ!!
-# Why I made the change on line 20 is to fit the pattern that many
-# instructions follow in which they will be like
-# mov[HL],[BR:ll] mov[HL],[HL] mov[HL][IX] mov[HL],[IY]
-# with each value of the instruction above being separated by 1 bit increments
-# ask me for more details if curious, otherwise nuke this comment after you see it! 
 #define register offset=0x04 size=2 [HL IX IY PC SP];
 #define register offset=0x0c size=1 [BR];
 
