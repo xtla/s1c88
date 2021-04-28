@@ -18,12 +18,10 @@ define space ram       type=ram_space       size=2  wordsize=1;
 define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
-define register offset=0x00 size=1 [ A B L H ];
-define register offset=0x04 size=1 [BR HL IX IY];
-
-#define register offset=0x04 size=2 [HL IX IY PC SP];
-#define register offset=0x0c size=1 [BR];
-
+define register offset=0x00 size=1 [A B L H];
+define register offset=0x00 size=2 [BA HL];
+define register offset=0x04 size=2 [IX IY PC SP];
+define register offset=0x0c size=2 [BR];
 define register offset=0x0e size=1 [F];
 # leave out CC for now
 
