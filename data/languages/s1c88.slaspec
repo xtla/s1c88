@@ -166,8 +166,10 @@ attach variables [ dreg0_1_instr8 dreg14_15_instr16 ] [BR HL IX IY];
   goto [reloc_];
 }
 
-:JMP_JRL imm24_instr24 imm16_instr24    is op8_instr24=0xF3 & imm16_instr24 & imm24_instr24 {}
-
+:JMP_JRL reloc is op8_instr24=0xF3 & imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_instr24 + (imm24_instr24 << 0x08)) + 2) & 0xFFFF;] {
+  local reloc_:4 = (inst_start + (imm16_instr24 + (imm24_instr24 << 0x08)) + 2) & 0xFFFF;
+  goto [reloc_];
+}
 
 :NOP is op8_instr8=0xFF {}
 
