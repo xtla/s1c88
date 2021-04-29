@@ -3,6 +3,9 @@
 <!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/processor_spec.rxg -->
 
 <processor_spec>
+  <default_symbols>
+    <symbol name="start" address="rom:0x2100" type="code" entry="true"/>
+  </default_symbols>
 <!--
   <programcounter register="PC"/>
   <register_data>
