@@ -43,6 +43,7 @@ define token instr8 (8)
   reg3_4_instr8 = (3, 4)
   reg0_1_instr8 = (0, 1)
   dreg0_1_instr8 = (0, 1)
+  b_reg0_1_instr8 = (0, 1)
 ;
 
 define token instr16 (16)
@@ -66,7 +67,7 @@ define token instr24 (24)
 
 attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
 attach variables [ dreg0_1_instr8 a_reg14_15_instr16 ] [BR HL IX IY];
-attach variables [b_reg14_15_instr16] [BA HL IX IY];
+attach variables [b_reg14_15_instr16 b_reg0_1_instr8] [BA HL IX IY];
 # attach variables [c_reg8_11_instr16] [SP PC];
 
 :ADDA_A is op8_instr8=0x00 {}
@@ -80,11 +81,14 @@ attach variables [b_reg14_15_instr16] [BA HL IX IY];
 
 :ADD "HL",imm16_instr24 is op8_instr24=0xC1 & imm16_instr24 {}
 
+:AND "F",imm8_instr16   is op8_instr16=0x9C & imm8_instr16 {}
+
 # cmp A,#nn
 :CMP "A",imm8_instr16   is op8_instr16=0x32 & imm8_instr16 {}
 
-:DEC_X is op8_instr8=0x9A {}
-:DEC_BA is op8_instr8=0x98 {}
+
+:DEC b_reg0_1_instr8 is op4_instr8=9 & op2_3_instr8=2 & b_reg0_1_instr8  {}
+:DEC reg0_1_instr8 is op4_instr8=8 & op2_3_instr8=2 & reg0_1_instr8  {}
 
 # 0b 0110 0001
 #    7654 3210
@@ -111,6 +115,7 @@ attach variables [b_reg14_15_instr16] [BA HL IX IY];
 # mov A,[BR:bb]
 :MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
 :MOV_A_IX is op16_instr16=0xCACE {}
+:MOV "A",imm8_instr16   is op8_instr16=0xb0 & imm8_instr16 {}
 
 # mov [HL], [rr]
 :MOV "[HL],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b11 & dreg0_1_instr8 {}
@@ -136,13 +141,18 @@ attach variables [b_reg14_15_instr16] [BA HL IX IY];
 :MOV "I",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC5 & imm24_instr24 {}
 # mov X,#nn
 :MOV "X",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC6 & imm24_instr24 {}
-
+:MOV_X_A    is op16_instr16=0xCECE {}
 
 :SBCA_B is op8_instr8=0x19 {}
+
+:SUB "A",imm8_instr16 is op8_instr16=0x12 & imm8_instr16 {}
 
 :ORAY is op8_instr8=0x2F {}
 :OR "A",imm8_instr16 is op8_instr16=0x2A & imm8_instr16 {}
 :OR "F",imm8_instr16 is op8_instr16=0x9D & imm8_instr16 {}
+
+:XCHNG_A_B is op8_instr8=0xCC {}
+:XCHNG_A_CONTENTS_HL is op8_instr8=0xCD {}
 
 :XOR "A","A" is op8_instr8=0x38 {}
 :XOR "A","B" is op8_instr8=0x39 {}
@@ -151,6 +161,8 @@ attach variables [b_reg14_15_instr16] [BA HL IX IY];
 :XOR "F",imm8_instr16 is op8_instr16=0x9E & imm8_instr16 {}
 
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
+:INC b_reg0_1_instr8 is op4_instr8=9 & op2_3_instr8=0 & b_reg0_1_instr8  {}
+
 
 :TST_B imm8_instr16 is op8_instr16=0x97 & imm8_instr16 {}
 
@@ -198,6 +210,9 @@ jrl_dest: reloc is imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_i
 :NOP is op8_instr8=0xFF {}
 
 :RET is op8_instr8=0xF8 {}
+
+# NOTE TO C: CONTENTS_HL means [HL]
+:ROLC_CONTENTS_HL is op16_instr16=0x93CE {}
 
 # define endian=little;
 # define alignment=1;
