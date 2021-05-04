@@ -151,10 +151,7 @@ attach variables [ c_reg0_1_instr8 ] [HL IX IY SP];
 :MOV_X_A    is op16_instr16=0xCECE {}
 :MOV_Y_A    is op16_instr16=0xCFCE {}
 
-# Yo c, according to my interpretation of docs there's only one MUL command
-# so I think (looking at the pokemini debugger) MUL L, A is the only mul instruction
-# could be wrong tho lmk if u see any MUL instructions that aren't MUL L, A
-:MUL is op16_instr16=0xD8CE {}
+:MUL "L,A" is op16_instr16=0xD8CE {}
 
 :SBCA_B is op8_instr8=0x19 {}
 
