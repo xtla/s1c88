@@ -253,6 +253,9 @@ jrl_dest: reloc is imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_i
   goto jrl_dest;
 }
 
+:CALL_CARL jrl_dest is op8_instr24=0xF2 & jrl_dest {
+  goto jrl_dest;
+}
 
 :NOP is op8_instr8=0xFF {}
 
