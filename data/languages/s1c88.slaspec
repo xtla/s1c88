@@ -209,12 +209,12 @@ jrl_dest: reloc is imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_i
 }
 
 # JMP IF CARRY FLAG SET
-:JMP_JCb jrs_dest is op8_instr16=0xE4 & jrs_dest {
-  if ($(Z_flag) == 0) goto jrs_dest;
+:JCb_JRS jrs_dest is op8_instr16=0xE4 & jrs_dest {
+  if ($(C_flag) == 1) goto jrs_dest;
 }
 
-:JMP_JNCb jrs_dest is op8_instr16=0xE5 & jrs_dest {
-  if ($(Z_flag) == 0) goto jrs_dest;
+:JNCb_JRS jrs_dest is op8_instr16=0xE5 & jrs_dest {
+  if ($(C_flag) == 0) goto jrs_dest;
 }
 
 
