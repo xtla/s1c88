@@ -194,7 +194,8 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 
 :POP b_reg0_1_instr8  is op4_instr8=0b1010 & op2_3_instr8=0b10 & b_reg0_1_instr8 {}
 :POP reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0xB & op10_11_instr16=1 & reg8_9_instr16 {}
-:POP_I  is op8_instr8=0xAD {}
+:POP_I is op8_instr8=0xAD {}
+:POP_X is op8_instr8=0xAE {}
 
 :PUSH_IY    is op8_instr8=0xA3 {}
 :PUSH_IX    is op8_instr8=0xA2 {}
