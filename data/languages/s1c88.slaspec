@@ -23,6 +23,7 @@ define register offset=0x00 size=2 [BA HL];
 define register offset=0x04 size=2 [IX IY PC SP];
 define register offset=0x0c size=2 [BR];
 define register offset=0x0e size=1 [F];
+define register offset=0x0f size=2 [I];
 # leave out CC for now
 
 @define Z_flag "F[0,1]" # Z: Zero
@@ -44,6 +45,7 @@ define token instr8 (8)
   reg0_1_instr8 = (0, 1)
   dreg0_1_instr8 = (0, 1)
   b_reg0_1_instr8 = (0, 1)
+  c_reg0_1_instr8 = (0, 1)
 ;
 
 define token instr16 (16)
@@ -51,7 +53,10 @@ define token instr16 (16)
   imm8_instr16 = (8, 15)
   op16_instr16 = (0, 15)
   reg8_instr16 = (8, 15)
+  op10_11_instr16 = (10, 11)
   op12_15_instr16 = (12, 15)
+  reg8_9_instr16 = (8, 9)
+  b_reg8_9_instr16 = (8, 9)
   a_reg14_15_instr16 = (14, 15)
   b_reg14_15_instr16 = (14, 15)
   c_reg8_11_instr16 = (8, 11)
@@ -65,9 +70,10 @@ define token instr24 (24)
   # and case with 1 16-bit op8_instr8, 1 8-bit operand
 ;
 
-attach variables [ reg0_1_instr8 reg3_4_instr8 ] [ A B L H ];
+attach variables [ reg0_1_instr8 reg3_4_instr8 reg8_9_instr16 ] [ A B L H ];
 attach variables [ dreg0_1_instr8 a_reg14_15_instr16 ] [BR HL IX IY];
-attach variables [b_reg14_15_instr16 b_reg0_1_instr8] [BA HL IX IY];
+attach variables [b_reg14_15_instr16 b_reg8_9_instr16 b_reg0_1_instr8 ] [BA HL IX IY];
+attach variables [ c_reg0_1_instr8 ] [HL IX IY SP];
 # attach variables [c_reg8_11_instr16] [SP PC];
 
 :ADDA_A is op8_instr8=0x00 {}
@@ -111,11 +117,13 @@ attach variables [b_reg14_15_instr16 b_reg0_1_instr8] [BA HL IX IY];
 # mov B,#nn
 :MOV "B",imm8_instr16    is op8_instr16=0xB1 & imm8_instr16 {}
 
+:MOV_A_CONTENTS_HL    is op16_instr16=0xC0CF {}
 
 # mov A,[BR:bb]
 :MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
 :MOV_A_IX is op16_instr16=0xCACE {}
 :MOV "A",imm8_instr16   is op8_instr16=0xb0 & imm8_instr16 {}
+:MOV "A",reg0_1_instr8  is op4_instr8=0x4 & op2_3_instr8=0 & reg0_1_instr8 {}
 
 # mov [HL], [rr]
 :MOV "[HL],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b11 & dreg0_1_instr8 {}
@@ -124,28 +132,34 @@ attach variables [b_reg14_15_instr16 b_reg0_1_instr8] [BA HL IX IY];
 # mov HL, rr
 
 # mov HL, BA
-# :MOV "HL",c_reg14_15_instr16 is imm8_instr16=0xCF & op12_15_instr16=0b1111010 & c_reg14_15_instr16 {}
+:MOV "HL",b_reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0xE & op10_11_instr16=1 & b_reg8_9_instr16 {}
+# mov [HL], rr
+:MOV "[HL]",b_reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0xC & op10_11_instr16=1 & b_reg8_9_instr16 {}
 
 # 0x    C    F    F    4
 # 0b 1100 1111 1111 0100
 #    7654 3210 FEDC BA98
 :MOV_HL_SP is op8_instr16=0xCF & op12_15_instr16=0xF & c_reg8_11_instr16=0x4 {}
 
+:MOV "BA",b_reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0xE & op10_11_instr16=0 & b_reg8_9_instr16 {}
 # mov BA,#mmnn
 :MOV "BA",imm24_instr24 imm16_instr24   is op8_instr24=0xC4 & imm16_instr24 & imm24_instr24 {}
-# NOTE: THERES AN ERROR ON THE WIKI PAGE!!
-# The instruction manual says CF,C5 is mov [HL], HL
-# but the wiki page says CF,C5 doesnt exist
-# and the wiki page has TWO entries for CE,C5 while the debugger shows the correct
 # CE,C5 as mov I, #pp
 :MOV "I",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC5 & imm24_instr24 {}
 # mov X,#nn
 :MOV "X",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC6 & imm24_instr24 {}
 :MOV_X_A    is op16_instr16=0xCECE {}
+:MOV_Y_A    is op16_instr16=0xCFCE {}
+
+# Yo c, according to my interpretation of docs there's only one MUL command
+# so I think (looking at the pokemini debugger) MUL L, A is the only mul instruction
+# could be wrong tho lmk if u see any MUL instructions that aren't MUL L, A
+:MUL is op16_instr16=0xD8CE {}
 
 :SBCA_B is op8_instr8=0x19 {}
 
 :SUB "A",imm8_instr16 is op8_instr16=0x12 & imm8_instr16 {}
+:SUB "BA",b_reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0 & op10_11_instr16=0b10 & b_reg8_9_instr16 {}
 
 :ORAY is op8_instr8=0x2F {}
 :OR "A",imm8_instr16 is op8_instr16=0x2A & imm8_instr16 {}
@@ -153,6 +167,8 @@ attach variables [b_reg14_15_instr16 b_reg0_1_instr8] [BA HL IX IY];
 
 :XCHNG_A_B is op8_instr8=0xCC {}
 :XCHNG_A_CONTENTS_HL is op8_instr8=0xCD {}
+# C 1 0 r r
+:XCHNG "BA",c_reg0_1_instr8 is op4_instr8=0xC & op2_3_instr8=0b10 & c_reg0_1_instr8 {}
 
 :XOR "A","A" is op8_instr8=0x38 {}
 :XOR "A","B" is op8_instr8=0x39 {}
@@ -162,17 +178,18 @@ attach variables [b_reg14_15_instr16 b_reg0_1_instr8] [BA HL IX IY];
 
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
 :INC b_reg0_1_instr8 is op4_instr8=9 & op2_3_instr8=0 & b_reg0_1_instr8  {}
-
+:INT_CONTENTS_HL is op8_instr8=0x86 {}
 
 :TST_B imm8_instr16 is op8_instr16=0x97 & imm8_instr16 {}
 
-:POP_Y is op8_instr8=0xAB {}
-:POP_HL is op8_instr8=0xA9 {}
+:POP b_reg0_1_instr8  is op4_instr8=0b1010 & op2_3_instr8=0b10 & b_reg0_1_instr8 {}
+:POP reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0xB & op10_11_instr16=1 & reg8_9_instr16 {}
+:POP_I  is op8_instr8=0xAD {}
 
 :PUSH_IY    is op8_instr8=0xA3 {}
 :PUSH_IX    is op8_instr8=0xA2 {}
 :PUSH_ALL   is op8_instr16=0xCE & imm8_instr16=0xB8 {}
-:PUSH_B     is op8_instr16=0xCE & imm8_instr16=0xB1 {}
+:PUSH_B     is op8_instr16=0xCF & imm8_instr16=0xB1 {}
 :PUSH_BA    is op8_instr8=0xA0 {}
 :PUSH_IP    is op8_instr8=0xA6 {}
 :PUSH_ALE   is op8_instr16=0xCE & imm8_instr16=0xB9 {}
@@ -193,6 +210,16 @@ jrs_dest: reloc is imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFFF
 jrl_dest: reloc is imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_instr24 + (imm24_instr24 << 0x08)) + 2) & 0xFFFF;] {
   export *:4 reloc;
 }
+
+# JMP IF CARRY FLAG SET
+:JMP_JCb jrs_dest is op8_instr16=0xE4 & jrs_dest {
+  if ($(Z_flag) == 0) goto jrs_dest;
+}
+
+:JMP_JNCb jrs_dest is op8_instr16=0xE5 & jrs_dest {
+  if ($(Z_flag) == 0) goto jrs_dest;
+}
+
 
 :JNZ_JRS jrs_dest is op8_instr16=0xE7 & jrs_dest {
   if ($(Z_flag) == 0) goto jrs_dest;
