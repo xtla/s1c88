@@ -3,12 +3,15 @@
 # Other language modules (see Ghidra/Processors) may provide better examples
 # when creating a new language module.
 
-# comment syntax note: r=A B H L rr=BR HL IX IY
+# comment syntax note: r=A B H L rr=BR HL IX IY exr=U I XI YI
 # NOTE: NOP desert @  0x721 - 0x20FE
 # S1C88 Manual Symbol = PokeMiniD Symbol
 # SC = F
 # NB = U
+# CB = V
 # EP = I
+# XP = XI
+# YP = YI
 
 define endian=little;
 define alignment=1;
@@ -18,13 +21,18 @@ define space ram       type=ram_space       size=2  wordsize=1;
 define space rom       type=ram_space       size=3  wordsize=1  default;
 # not done yet
 
+# Standard registers
 define register offset=0x00 size=1 [A B L H];
 define register offset=0x00 size=2 [BA HL];
 define register offset=0x04 size=2 [IX IY PC SP];
 define register offset=0x0c size=2 [BR];
 define register offset=0x0e size=1 [F];
-define register offset=0x0f size=2 [I];
 # leave out CC for now
+
+# Expansion registers
+# The offset here is arbitrary; it's just to avoid overlap with the standard registers.
+# TODO here: figure out how to specify that XI and YI are extensions to their corresponding standard registers
+define register offset=0x10 size=1 [U V I XI YI];
 
 @define Z_flag "F[0,1]" # Z: Zero
 @define C_flag "F[1,1]" # C: Carry
