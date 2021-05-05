@@ -73,10 +73,8 @@ define token instr16 (16)
 
 define token instr24 (24)
   op8_instr24 = (0, 7)
-  imm16_instr24 = (8, 15)
-  imm24_instr24 = (16, 23)
-  # not implemented yet: case with 1 8-bit op8_instr8, 2 8-bit operands
-  # and case with 1 16-bit op8_instr8, 1 8-bit operand
+  imm8_15_instr24 = (8, 15)
+  imm16_23_instr24 = (16, 23)
 ;
 
 define token instr32 (32)
@@ -96,11 +94,11 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :ADDA imm8_instr16 is op8_instr16=0x02 & imm8_instr16 {}
 :ADD_A_HL is op8_instr8=0x03 {}
 :ADDA_BR:imm8_instr16 is op8_instr16=0x04 & imm8_instr16 {}
-:ADD "A","["imm24_instr24 imm16_instr24"]" is op8_instr24=0x05 & imm16_instr24 & imm24_instr24 {}
+:ADD "A","["imm16_23_instr24 imm8_15_instr24"]" is op8_instr24=0x05 & imm8_15_instr24 & imm16_23_instr24 {}
 # add IY, #hhll
-:ADD "Y",imm24_instr24 imm16_instr24    is op8_instr24=0xC3 & imm16_instr24 & imm24_instr24 {}
+:ADD "Y",imm16_23_instr24 imm8_15_instr24    is op8_instr24=0xC3 & imm8_15_instr24 & imm16_23_instr24 {}
 
-:ADD "HL",imm16_instr24 is op8_instr24=0xC1 & imm16_instr24 {}
+:ADD "HL",imm8_15_instr24 is op8_instr24=0xC1 & imm8_15_instr24 {}
 
 :AND "F",imm8_instr16   is op8_instr16=0x9C & imm8_instr16 {}
 
@@ -117,15 +115,17 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 # mov [X], [rr]
 :MOV "[X],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b01 & dreg0_1_instr8 {}
 :MOV "[Y]",reg0_1_instr8    is op4_instr8=0x07 & op2_3_instr8=0x00 & reg0_1_instr8 {}
-:MOV "[Y]","["imm24_instr24 imm16_instr24"]"    is op8_instr24=0xBB & imm16_instr24 & imm24_instr24 {}
+:MOV "[Y]","["imm16_23_instr24 imm8_15_instr24"]"    is op8_instr24=0xBB & imm8_15_instr24 & imm16_23_instr24 {}
 :MOV reg3_4_instr8,"[HL]"   is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x05 {}
 :MOV reg3_4_instr8,"[X]"    is op5_instr8=0x02 & reg3_4_instr8 & op0_2_instr8=0x06 {}
-:MOV "U",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC4 & imm24_instr24 {}
+:MOV "U",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC4 & imm16_23_instr24 {}
 
 # mov L,r
 :MOV "L",reg0_1_instr8    is op4_instr8=5 & op2_3_instr8=0 & reg0_1_instr8 {}
 # mov L,[BR:bb]
 :MOV "L,[BR:"imm8_instr16"]"    is op8_instr16=0x54 & imm8_instr16 {}
+
+:MOV "F",imm8_instr16 is op8_instr16=0x9F & imm8_instr16 {}
 
 # mov B,r
 :MOV "B",reg0_1_instr8    is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
@@ -165,13 +165,19 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :MOV "SP",imm16_instr32 is op16_instr32=0x6ECF & imm16_instr32 {}
 
 # mov BA,#mmnn
-:MOV "BA",imm24_instr24 imm16_instr24   is op8_instr24=0xC4 & imm16_instr24 & imm24_instr24 {}
+:MOV "BA",imm16_23_instr24 imm8_15_instr24 is op8_instr24=0xC4 & imm8_15_instr24 & imm16_23_instr24 {}
+# mov HL,#mmnn
+:MOV "HL",imm16_23_instr24 imm8_15_instr24 is op8_instr24=0xC5 & imm8_15_instr24 & imm16_23_instr24 {}
+
 # CE,C5 as mov I, #pp
-:MOV "I",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC5 & imm24_instr24 {}
+:MOV "I",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC5 & imm16_23_instr24 {}
 # mov X,#nn
-:MOV "X",imm24_instr24    is op8_instr24=0xCE & imm16_instr24=0xC6 & imm24_instr24 {}
+:MOV "X",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC6 & imm16_23_instr24 {}
+:MOV "Y",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC7 & imm16_23_instr24 {}
 :MOV_X_A    is op16_instr16=0xCECE {}
 :MOV_Y_A    is op16_instr16=0xCFCE {}
+
+:MOV ["N"+imm8_15_instr24], imm16_23_instr24 is op8_instr24=0xDD & imm8_15_instr24 & imm16_23_instr24 {}
 
 :MUL "L,A" is op16_instr16=0xD8CE {}
 
@@ -192,7 +198,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :XOR "A","A" is op8_instr8=0x38 {}
 :XOR "A","B" is op8_instr8=0x39 {}
 :XOR "A",imm8_instr16 is op8_instr16=0x3A & imm8_instr16 {}
-:XOR "A",imm16_instr24 imm24_instr24 is op8_instr24=0x3D & imm16_instr24 & imm24_instr24 {}
+:XOR "A",imm8_15_instr24 imm16_23_instr24 is op8_instr24=0x3D & imm8_15_instr24 & imm16_23_instr24 {}
 :XOR "F",imm8_instr16 is op8_instr16=0x9E & imm8_instr16 {}
 
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
@@ -227,7 +233,7 @@ jrs_dest: reloc is imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFFF
   export *:4 reloc;
 }
 
-jrl_dest: reloc is imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_instr24 + (imm24_instr24 << 0x08)) + 2) & 0xFFFF;] {
+jrl_dest: reloc is imm8_15_instr24 & imm16_23_instr24 [reloc = (inst_start + (imm8_15_instr24 + (imm16_23_instr24 << 0x08)) + 2) & 0xFFFF;] {
   export *:4 reloc;
 }
 
@@ -260,6 +266,7 @@ jrl_dest: reloc is imm16_instr24 & imm24_instr24 [reloc = (inst_start + (imm16_i
 :NOP is op8_instr8=0xFF {}
 
 :RET is op8_instr8=0xF8 {}
+:RETI is op8_instr8=0xF9 {}
 
 # NOTE TO C: CONTENTS_HL means [HL]
 :ROLC_CONTENTS_HL is op16_instr16=0x93CE {}
