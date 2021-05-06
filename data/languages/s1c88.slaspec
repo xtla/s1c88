@@ -73,8 +73,13 @@ define token instr16 (16)
 
 define token instr24 (24)
   op8_instr24 = (0, 7)
+  op12_15_instr24 = (12, 15)
+  op10_11_instr24 = (10, 11)
+  op9_instr24 = (9, 9)
+  op16_23_instr24 = (16, 23)
   imm8_15_instr24 = (8, 15)
   imm16_23_instr24 = (16, 23)
+  d_reg_8_instr24 = (8, 8)
 ;
 
 define token instr32 (32)
@@ -86,6 +91,7 @@ attach variables [ reg0_1_instr8 reg3_4_instr8 reg8_9_instr16 ] [ A B L H ];
 attach variables [ dreg0_1_instr8 a_reg14_15_instr16 ] [BR HL IX IY];
 attach variables [b_reg14_15_instr16 b_reg8_9_instr16 b_reg0_1_instr8 ] [BA HL IX IY];
 attach variables [ c_reg0_1_instr8 ] [HL IX IY SP];
+attach variables [ d_reg_8_instr24 ] [ IX IY ];
 attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 # attach variables [c_reg8_11_instr16] [SP PC];
 
@@ -131,14 +137,15 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :MOV "B",reg0_1_instr8    is op4_instr8=4 & op2_3_instr8=2 & reg0_1_instr8 {}
 # mov B,#nn
 :MOV "B",imm8_instr16    is op8_instr16=0xB1 & imm8_instr16 {}
+:MOV "B,["d_reg_8_instr24"+"imm16_23_instr24"]"   is op8_instr24=0xCE & op12_15_instr24=0x4 & op10_11_instr24=2 & op9_instr24=0 & d_reg_8_instr24 & imm16_23_instr24 {}
 
 :MOV_A_CONTENTS_HL    is op16_instr16=0xC0CF {}
 
-# mov A,[BR:bb]
 :MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
 :MOV_A_IX is op16_instr16=0xCACE {}
 :MOV "A",imm8_instr16   is op8_instr16=0xb0 & imm8_instr16 {}
 :MOV "A",reg0_1_instr8  is op4_instr8=0x4 & op2_3_instr8=0 & reg0_1_instr8 {}
+:MOV "A,["d_reg_8_instr24"+"imm16_23_instr24"]"   is op8_instr24=0xCE & op12_15_instr24=0x4 & op10_11_instr24=0 & op9_instr24=0 & d_reg_8_instr24 & imm16_23_instr24 {}
 
 :MOV "N",imm8_instr16 is op8_instr16=0xB4 & imm8_instr16 {}
 
@@ -306,3 +313,4 @@ jrl_dest: reloc is imm8_15_instr24 & imm16_23_instr24 [reloc = (inst_start + (im
 #
 # # Include contents of skel.sinc file
 # @include "skel.sinc"
+
