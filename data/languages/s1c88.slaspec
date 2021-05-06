@@ -73,6 +73,7 @@ define token instr16 (16)
 
 define token instr24 (24)
   op8_instr24 = (0, 7)
+  op16_instr24 = (8, 15)
   op12_15_instr24 = (12, 15)
   op10_11_instr24 = (10, 11)
   op9_instr24 = (9, 9)
@@ -111,7 +112,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 
 # cmp A,#nn
 :CMP "A",imm8_instr16   is op8_instr16=0x32 & imm8_instr16 {}
-
+:CMP "[HL]",imm16_23_instr24    is op8_instr24=0xCE & op16_instr24=0x35 & imm16_23_instr24 {}
 
 :DEC b_reg0_1_instr8 is op4_instr8=9 & op2_3_instr8=2 & b_reg0_1_instr8  {}
 :DEC reg0_1_instr8 is op4_instr8=8 & op2_3_instr8=2 & reg0_1_instr8  {}
@@ -154,7 +155,6 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :MOV "[HL],["dreg0_1_instr8"]"    is op4_instr8=0b0110 & op2_3_instr8=0b11 & dreg0_1_instr8 {}
 # mov [HL], r
 :MOV "[HL]",reg0_1_instr8    is op4_instr8=0b0110 & op2_3_instr8=0b10 & reg0_1_instr8 {}
-# mov HL, rr
 
 # mov A,YI
 :MOV "A",ext_reg0_1_instr16 is op8_instr16=0xCE & op12_15_instr16=0xC & op10_11_instr16=0b10 & ext_reg0_1_instr16 {}
@@ -184,7 +184,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :MOV "X",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC6 & imm16_23_instr24 {}
 :MOV "Y",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC7 & imm16_23_instr24 {}
 :MOV "Y",b_reg8_9_instr16   is op8_instr16=0xCF & op12_15_instr16=0xE & op10_11_instr16=3 & b_reg8_9_instr16 {}
-
+:MOV "[Y]",imm8_instr16   is op8_instr16=0xB7 & imm8_instr16 {}
 
 :MOV_X_A    is op16_instr16=0xCECE {}
 :MOV_Y_A    is op16_instr16=0xCFCE {}
@@ -217,6 +217,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :INC imm8_instr16 is op8_instr16=0x85 & imm8_instr16 {}
 :INC b_reg0_1_instr8 is op4_instr8=9 & op2_3_instr8=0 & b_reg0_1_instr8  {}
 :INT_CONTENTS_HL is op8_instr8=0x86 {}
+:INC reg0_1_instr8  is op4_instr8=8 & op2_3_instr8=0 & reg0_1_instr8 {}
 
 :TST_B imm8_instr16 is op8_instr16=0x97 & imm8_instr16 {}
 
