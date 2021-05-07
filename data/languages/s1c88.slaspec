@@ -63,8 +63,10 @@ define token instr16 (16)
   reg8_instr16 = (8, 15)
   op10_11_instr16 = (10, 11)
   op12_15_instr16 = (12, 15)
+  op15_15_instr16 = (15, 15)
   reg8_9_instr16 = (8, 9)
   b_reg8_9_instr16 = (8, 9)
+  imm8_14_instr16 = (8, 14)
   a_reg14_15_instr16 = (14, 15)
   b_reg14_15_instr16 = (14, 15)
   c_reg8_11_instr16 = (8, 11)
@@ -243,30 +245,44 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 
 :UNPACK is op8_instr8=0xDF {}
 
-jrs_dest: reloc is imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFFFF;] {
+jrs_dest_pos: reloc is imm8_instr16 [reloc = (inst_start + imm8_instr16 + 1) & 0xFFFF;] {
   export *:4 reloc;
 }
+
+# -128 + (imm8_14_instr16) + 1
+
+jrs_dest_neg: reloc is imm8_14_instr16 [reloc = (inst_start + -128 + imm8_14_instr16 + 1) & 0xFFFF;] {
+  export *:4 reloc;
+}
+
+# 0xE7EE
+# 0b1110 0111 1110 1110
+#   7654 3210 fedc ba98
 
 jrl_dest: reloc is imm8_15_instr24 & imm16_23_instr24 [reloc = (inst_start + (imm8_15_instr24 + (imm16_23_instr24 << 0x08)) + 2) & 0xFFFF;] {
   export *:4 reloc;
 }
 
 # JMP IF CARRY FLAG SET
-:JCb_JRS jrs_dest is op8_instr16=0xE4 & jrs_dest {
-  if ($(C_flag) == 1) goto jrs_dest;
+:JCb_JRS jrs_dest_pos is op8_instr16=0xE4 & jrs_dest_pos {
+  if ($(C_flag) == 1) goto jrs_dest_pos;
 }
 
-:JNCb_JRS jrs_dest is op8_instr16=0xE5 & jrs_dest {
-  if ($(C_flag) == 0) goto jrs_dest;
+:JNCb_JRS jrs_dest_pos is op8_instr16=0xE5 & jrs_dest_pos {
+  if ($(C_flag) == 0) goto jrs_dest_pos;
 }
 
 
-:JNZ_JRS jrs_dest is op8_instr16=0xE7 & jrs_dest {
-  if ($(Z_flag) == 0) goto jrs_dest;
+:JNZ_JRS_pos jrs_dest_pos is op15_15_instr16=0 & op8_instr16=0xE7 & jrs_dest_pos {
+  if ($(Z_flag) == 0) goto jrs_dest_pos;
 }
 
-:JMP_JRS jrs_dest is op8_instr16=0xF1 & jrs_dest {
-  goto jrs_dest;
+:JNZ_JRS_neg jrs_dest_neg is op15_15_instr16=1 & op8_instr16=0xE7 & jrs_dest_neg {
+  if ($(Z_flag) == 0) goto jrs_dest_neg;
+}
+
+:JMP_JRS jrs_dest_pos is op8_instr16=0xF1 & jrs_dest_pos {
+  goto jrs_dest_pos;
 }
 
 :JMP_JRL jrl_dest is op8_instr24=0xF3 & jrl_dest {
