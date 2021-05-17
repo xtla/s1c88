@@ -18,7 +18,7 @@ define alignment=1;
 
 define space register  type=register_space  size=1  wordsize=1;
 define space ram       type=ram_space       size=2  wordsize=1;
-define space rom       type=ram_space       size=3  wordsize=1  default;
+define space rom       type=ram_space       size=2  wordsize=1  default;
 # not done yet
 
 # Standard registers
