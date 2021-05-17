@@ -43,6 +43,16 @@ define register offset=0x10 size=1 [U V I XI YI];
 @define ID_flag "F[6,1]" # ID: Interrupt Disable
 @define IB_flag "F[7,1]" # IB: Interrupt Branch
 
+macro push16(val16) {
+  SP = SP - 2;
+  *:2 SP = val16;
+}
+
+macro pop16(ret16) {
+  ret16 = *:2 SP;
+  SP = SP + 2;
+}
+
 define token instr8 (8)
   op8_instr8 = (0, 7)
   op4_instr8 = (4, 7)
@@ -336,14 +346,21 @@ jrl_dest: reloc is imm8_23_signed_instr24 [reloc = (inst_next - 1 + imm8_23_sign
   goto jrl_dest;
 }
 
+# Function calls
+
 :CALL_CARL jrl_dest is op8_instr24=0xF2 & jrl_dest {
-  goto jrl_dest;
+  push16(&:2 inst_start);
+  call jrl_dest;
 }
 
-:NOP is op8_instr8=0xFF {}
+:RET is op8_instr8=0xF8 {
+  pop16(PC);
+  return [PC];
+}
 
-:RET is op8_instr8=0xF8 {}
 :RETI is op8_instr8=0xF9 {}
+
+:NOP is op8_instr8=0xFF {}
 
 # NOTE TO C: CONTENTS_HL means [HL]
 :ROLC_CONTENTS_HL is op16_instr16=0x93CE {}
