@@ -340,6 +340,11 @@ jrl_dest: reloc is imm8_23_signed_instr24 [reloc = (inst_next - 1 + imm8_23_sign
   if ($(S_flag) ^ $(S_flag) == 0) goto jrs_dest_instr24;
 }
 
+:JDBNZ_JRS jrs_dest_instr16 is op8_instr16=0xF5 & jrs_dest_instr16 {
+  B = B - 1;
+  if B != 0 goto jrs_dest_instr16;
+}
+
 # Conditional relative long jumps
 
 :JCb_JRL jrl_dest is op8_instr24=0xEC & jrl_dest {
