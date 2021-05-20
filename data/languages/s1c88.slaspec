@@ -120,6 +120,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :ADD "A","["imm16_23_instr24 imm8_15_instr24"]" is op8_instr24=0x05 & imm8_15_instr24 & imm16_23_instr24 {}
 :ADD "Y",imm16_23_instr24 imm8_15_instr24    is op8_instr24=0xC3 & imm8_15_instr24 & imm16_23_instr24 {}
 :ADD "HL",imm8_15_instr24 is op8_instr24=0xC1 & imm8_15_instr24 {}
+:ADD_X_HL is op16_instr16=0x41CF {}
 
 :AND "F",imm8_instr16   is op8_instr16=0x9C & imm8_instr16 {}
 
@@ -156,6 +157,8 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :MOV_A_CONTENTS_HL    is op16_instr16=0xC0CF {}
 
 :MOV "A,[BR:"imm8_instr16"]"    is op8_instr16=0x44 & imm8_instr16 {}
+:MOV "A","[IY]"    is op8_instr8=0x47 {}
+
 :MOV_A_IX is op16_instr16=0xCACE {}
 :MOV "A",imm8_instr16   is op8_instr16=0xb0 & imm8_instr16 {}
 :MOV "A",reg0_1_instr8  is op4_instr8=0x4 & op2_3_instr8=0 & reg0_1_instr8 {}
@@ -179,6 +182,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 # mov [HL], rr
 :MOV "[HL]",b_reg8_9_instr16 is op8_instr16=0xCF & op12_15_instr16=0xC & op10_11_instr16=1 & b_reg8_9_instr16 {}
 :MOV "HL,[SP+" imm16_23_instr24 "]"   is op8_instr24=0xCF & op16_instr24=0x71 & imm16_23_instr24 {}
+:MOV "Y,[SP+" imm16_23_instr24 "]"   is op8_instr24=0xCF & op16_instr24=0x73 & imm16_23_instr24 {}
 
 # 0x    C    F    F    4
 # 0b 1100 1111 1111 0100
@@ -200,6 +204,7 @@ attach variables [ ext_reg0_1_instr16  ] [U I XI YI];
 :MOV "X",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC6 & imm16_23_instr24 {}
 :MOV "Y",imm16_23_instr24    is op8_instr24=0xCE & imm8_15_instr24=0xC7 & imm16_23_instr24 {}
 :MOV "Y",b_reg8_9_instr16   is op8_instr16=0xCF & op12_15_instr16=0xE & op10_11_instr16=3 & b_reg8_9_instr16 {}
+:MOV "X",imm16_23_instr24 imm8_15_instr24   is op8_instr24=0xC6 & imm16_23_instr24 & imm8_15_instr24 {}
 :MOV "Y",imm16_23_instr24 imm8_15_instr24   is op8_instr24=0xC7 & imm16_23_instr24 & imm8_15_instr24 {}
 :MOV "[Y]",imm8_instr16   is op8_instr16=0xB7 & imm8_instr16 {}
 
